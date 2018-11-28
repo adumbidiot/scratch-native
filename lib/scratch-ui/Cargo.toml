@@ -1,0 +1,10 @@
+[package]
+name = "scratch-ui"
+version = "0.1.0"
+authors = ["adumbidiot <nathaniel.daniel23@outlook.com>"]
+edition = "2018"
+build="build.rs"
+
+[dependencies]
+piston_window = "0.81.0"
+image="0.20"

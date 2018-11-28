@@ -1,0 +1,8 @@
+[package]
+name = "scratch-ui-test"
+version = "0.1.0"
+authors = ["adumbidiot <nathaniel.daniel23@outlook.com>"]
+edition = "2018"
+
+[dependencies]
+scratch-ui = {path = "../scratch-ui"}

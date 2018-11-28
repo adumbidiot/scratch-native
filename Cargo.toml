@@ -1,0 +1,19 @@
+[package]
+name = "scratch-native"
+version = "0.1.0"
+authors = ["adumbidiot <nathaniel.daniel23@outlook.com>"]
+edition = "2018"
+
+[dependencies]
+hyper = "0.12"
+http = "0.1"
+hyper-tls="0.3"
+serde = "1.0"
+serde_derive = "1.0"
+serde_json = "1.0"
+tokio = "0.1"
+futures = "0.1"
+tokio-process="0.2"
+toml="0.4"
+
+curl="0.4"
