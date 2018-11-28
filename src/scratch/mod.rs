@@ -6,6 +6,7 @@ pub mod api;
 use hyper::rt::Future;
 use hyper::rt::{Stream};
 use std::path::PathBuf;
+
 use self::error::Error;
 use self::project::{Project, ProjectJson};
 use tokio::fs::{create_dir_all};
@@ -19,18 +20,17 @@ use tokio::fs::OpenOptions;
 use std::sync::RwLock;
 use std::sync::Arc;
 
+
 type Client = hyper::Client<hyper_tls::HttpsConnector<hyper::client::HttpConnector>>;
 const SCRATCH_ASSETS_CDN: &'static str = "https://cdn.assets.scratch.mit.edu";
-
+/*
 pub fn get_project_json(code: &str) -> Result<Project, Error>{
 	let code_str = code.to_string();
 	let api = api::Api::new();
-	let body = api.get_project(code).unwrap();
-	let json: ProjectJson = serde_json::from_slice(&body)?;
-	let mut p = Project::from(json);
-	p.code = Some(code_str);
-	return Ok(p);
-}
+	let mut project = api.get_project(code).unwrap();
+	project.code = Some(code_str);
+	return Ok(project);
+*/
 
 pub fn generate_project(client: &Client, project: &Project, project_path: &PathBuf) -> Result<impl Future<Item=(), Error=Error>, Error>{
 	let mut project_path_mut = project_path.clone();

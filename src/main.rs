@@ -24,16 +24,19 @@ fn main() {
     let client = Arc::from(Client::builder()
 		.build::<_, hyper::Body>(https));
 	
-	let api = scratch::api::Api::new();
-	api.get_project("239742347");
+	let mut api = scratch::api::Api::new();
+	print!("Downlading Project... ");
+	let mut project = api.get_project("239742347");
+	println!("Done");
+	
 	return;
 	
-	print!("Downlading Project... ");
-	let project = scratch::get_project_json("239742347").unwrap();
+	
+	//let project = scratch::get_project_json("239742347").expect("Could not get project");
 	//println!("{:#?}", &project);
-	println!("Done");
+	
 	print!("Generating Project... ");
-	let work = scratch::generate_project(&client, &project, &std::path::PathBuf::from("projects"))
+	/*let work = scratch::generate_project(&client, &project, &std::path::PathBuf::from("projects"))
 		.unwrap()
 		.and_then(|_|{
 			println!("Done");
@@ -51,4 +54,5 @@ fn main() {
 		});
 	
 	rt::run(work);
+	*/
 }

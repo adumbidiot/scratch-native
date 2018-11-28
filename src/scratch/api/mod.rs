@@ -1,33 +1,32 @@
 pub mod types;
 
 use curl::easy::{Easy2, Handler, WriteError};
+use self::types::*;
 
 pub struct Api {
-
+	handle: Easy2<BufferBody>,
 }
 
 impl Api {
 	pub fn new() -> Self {
 		return Self {
-			
+			handle: Easy2::new(BufferBody::new())
 		};
 	}
 	
-	pub fn get_project(&self, code: &str) -> ApiResult<Vec<u8>>{
+	pub fn get_project(&mut self, code: &str) -> ApiResult<Project>{
 		let url = format!("https://cdn.projects.scratch.mit.edu/internalapi/project/{}/get", code);
-		let mut handle = Easy2::new(BufferBody::new());
-		handle.url(&url)?;
-		handle.perform()?;
 		
-		let mut body = Vec::new();
-		{
-			let handler = handle.get_mut();
-			body = handler.take_buffer();
-			handler.reset();
-		}
+		self.handle.url(&url)?;
+		self.handle.perform()?;
 		
-		println!("{}", String::from_utf8(body.clone())?);
-		return Ok(body);
+		let handler = self.handle.get_mut();
+		let body = handler.take_buffer();
+		handler.reset();
+		
+		let project: ProjectJson = serde_json::from_slice(&body).expect("Error Parsing");
+		
+		return Ok(project.into());
 	}
 }
 
