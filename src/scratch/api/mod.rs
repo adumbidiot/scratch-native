@@ -1,4 +1,5 @@
 pub mod types;
+pub mod targets;
 
 use curl::easy::{Easy2, Handler, WriteError};
 use self::types::*;
@@ -24,9 +25,24 @@ impl Api {
 		let body = handler.take_buffer();
 		handler.reset();
 		
-		let project: ProjectJson = serde_json::from_slice(&body).expect("Error Parsing");
+		let project_json: ProjectJson = serde_json::from_slice(&body).expect("Error Parsing");
+		let mut project: Project = project_json.into();
+		project.code = Some(code.to_string());
 		
-		return Ok(project.into());
+		return Ok(project);
+	}
+	
+	pub fn get_asset(&mut self, name: &str) -> ApiResult<Vec<u8>>{
+		let url = format!("https://cdn.assets.scratch.mit.edu/internalapi/asset/{}/get", name);
+		
+		self.handle.url(&url)?;
+		self.handle.perform()?;
+		
+		let handler = self.handle.get_mut();
+		let body = handler.take_buffer();
+		handler.reset();
+		
+		return Ok(body);
 	}
 }
 

@@ -1,4 +1,4 @@
-use super::project::Sprite;
+use super::api::types::Sprite;
 
 const PISTON_TEMPLATE_FRAG_1: &'static str = r#"
 extern crate scratch_ui;

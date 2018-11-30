@@ -1,25 +1,11 @@
 #[derive(Debug)]
 pub enum Error{
-	Parse(http::uri::InvalidUri),
-	Fetch(hyper::Error),
 	Stringify(std::string::FromUtf8Error),
 	Json(serde_json::Error),
 	File(std::io::Error),
 	TomlDecode(toml::de::Error),
 	TomlEncode(toml::ser::Error),
 	Option(()),
-}
-
-impl From<http::uri::InvalidUri> for Error {
-    fn from(err: http::uri::InvalidUri) -> Error {
-        Error::Parse(err)
-    }
-}
-
-impl From<hyper::Error> for Error {
-    fn from(err: hyper::Error) -> Error {
-        Error::Fetch(err)
-    }
 }
 
 impl From<std::string::FromUtf8Error> for Error {
