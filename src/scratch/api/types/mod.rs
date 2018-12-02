@@ -38,8 +38,9 @@ impl Project {
 		return Ok(project);
 	}
 	
-	pub fn get_name(&self) -> Option<&String>{
-		return self.name.as_ref().or(self.code.as_ref());
+	pub fn get_name(&mut self) -> Option<&String>{
+		
+		return Some(self.name.get_or_insert("scratch_".to_string() + self.code.as_ref()?));
 	}
 	
 	fn mkdir(path: &PathBuf) -> Result<(), std::io::Error>{
@@ -47,7 +48,7 @@ impl Project {
 		return std::fs::create_dir(&path);
 	}
 	
-	pub fn init(&self, api: &mut super::Api, mut path: PathBuf) -> ApiResult<()>{
+	pub fn init(&mut self, api: &mut super::Api, mut path: PathBuf) -> ApiResult<()>{
 		//Test to see if loc is valid
 		let name = self.get_name().expect("No Name");
 		path.push(name);
@@ -125,17 +126,30 @@ impl Project {
 		return Ok(());
 	}
 	
-	pub fn init_target<T: Target>(&self, target: &mut T) -> ApiResult<()>{
+	pub fn init_target<T: Target>(&mut self, target: &mut T) -> ApiResult<()>{
 		let path_str = self.path.as_ref().expect("No Path");
 		let mut path = PathBuf::from(path_str);
 		path.push("target");
 		path.push(target.get_name());
-		target.init(&path).unwrap();
+		target.init(self, &path).unwrap();
 		return Ok(());
 	}
 	
-	pub fn build_target<T: Target>(&self, target: &mut T) -> ApiResult<()>{
-		
+	pub fn build_target<T: Target>(&mut self, target: &mut T) -> ApiResult<()>{
+		let path_str = self.path.as_ref().expect("No Path");
+		let mut path = PathBuf::from(path_str);
+		path.push("target");
+		path.push(target.get_name());
+		target.build(self, &path);
+		return Ok(());
+	}
+	
+	pub fn test_target<T: Target>(&mut self, target: &mut T) -> ApiResult<()>{
+		let path_str = self.path.as_ref().expect("No Path");
+		let mut path = PathBuf::from(path_str);
+		path.push("target");
+		path.push(target.get_name());
+		target.test(self, &path);
 		return Ok(());
 	}
 }

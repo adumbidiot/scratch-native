@@ -21,12 +21,14 @@ fn main() {
 	println!("Loading Project... ");
 	let mut path = PathBuf::from("projects");
 	path.push("239742347");
-	let project = scratch::api::types::Project::from_path(path).expect("Error Loading Project");
+	let mut project = scratch::api::types::Project::from_path(path).expect("Error Loading Project");
 	let mut target = scratch::api::targets::JsTarget::new();
 	println!("Setting up target... ");
 	project.init_target(&mut target).unwrap();
 	println!("Building target... ");
 	project.build_target(&mut target).unwrap();
+	println!("Testing target... ");
+	project.test_target(&mut target).unwrap();
 	
 	return;
 	std::fs::remove_dir_all("projects/239742347").unwrap();
@@ -55,4 +57,8 @@ fn main() {
 	
 	rt::run(work);
 	*/
+}
+
+fn build(){
+
 }

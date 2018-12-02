@@ -43,4 +43,14 @@ pub struct SpriteJson{
 	pub y: i32,
 	
 	pub costumes: Vec<CostumeJson>
+	pub sounds: Vec<SoundJson>
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct SoundJson{
+	#[serde(rename = "soundName")]
+	pub name: String,
+	
+	#[serde(rename = "83a9787d4cb6f3b7632b4ddfebf74367.wav")]
+	pub src: String,
 }

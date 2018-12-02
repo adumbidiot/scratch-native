@@ -159,9 +159,9 @@ pub fn build_project(project_path: &PathBuf) -> Result<impl Future<Item=(), Erro
 	
 	return Ok(work);
 }
-
-pub fn init_rust_project(path: PathBuf, project: &api::types::Project) -> impl Future<Item=(), Error=Error>{
-	let project_name = "scratch".to_string() + &project.code.clone().unwrap_or("default".to_string());
+*/
+pub fn init_rust_project(path: PathBuf, project: &mut api::types::Project) -> impl Future<Item=(), Error=Error>{
+	let project_name = project.get_name().unwrap();
 	return Command::new("cargo")
 		.current_dir(path)
 		.arg("init")
@@ -199,4 +199,3 @@ pub fn copy_dir(src: PathBuf, mut dest: PathBuf) -> impl Future<Item=(), Error=E
 	
 	return work.from_err();
 }
-*/

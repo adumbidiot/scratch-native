@@ -15,16 +15,21 @@ impl Api {
 		};
 	}
 	
-	pub fn get_project(&mut self, code: &str) -> ApiResult<Project>{
-		let url = format!("https://cdn.projects.scratch.mit.edu/internalapi/project/{}/get", code);
-		
+	pub fn get_url(&mut self, url: &str) -> ApiResult<Vec<u8>> {
 		self.handle.url(&url)?;
 		self.handle.perform()?;
 		
 		let handler = self.handle.get_mut();
 		let body = handler.take_buffer();
 		handler.reset();
+		return Ok(body);
+	}
+	
+	pub fn get_project(&mut self, code: &str) -> ApiResult<Project>{
+		let url = format!("https://cdn.projects.scratch.mit.edu/internalapi/project/{}/get", code);
 		
+		
+		let body = self.get_url(&url)?;
 		let project_json: ProjectJson = serde_json::from_slice(&body).expect("Error Parsing");
 		let mut project: Project = project_json.into();
 		project.code = Some(code.to_string());
@@ -34,15 +39,7 @@ impl Api {
 	
 	pub fn get_asset(&mut self, name: &str) -> ApiResult<Vec<u8>>{
 		let url = format!("https://cdn.assets.scratch.mit.edu/internalapi/asset/{}/get", name);
-		
-		self.handle.url(&url)?;
-		self.handle.perform()?;
-		
-		let handler = self.handle.get_mut();
-		let body = handler.take_buffer();
-		handler.reset();
-		
-		return Ok(body);
+		return self.get_url(&url);
 	}
 }
 
