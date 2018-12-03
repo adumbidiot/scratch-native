@@ -19,6 +19,9 @@ pub struct Project {
 	
 	#[serde(skip)]
 	pub project_json: ProjectJson,
+	
+	#[serde(skip)]
+	pub stats: Option<InfoJson>,
 }
 
 impl Project {
@@ -39,7 +42,6 @@ impl Project {
 	}
 	
 	pub fn get_name(&mut self) -> Option<&String>{
-		
 		return Some(self.name.get_or_insert("scratch_".to_string() + self.code.as_ref()?));
 	}
 	
@@ -48,12 +50,15 @@ impl Project {
 		return std::fs::create_dir(&path);
 	}
 	
-	pub fn init(&mut self, api: &mut super::Api, mut path: PathBuf) -> ApiResult<()>{
-		//Test to see if loc is valid
+	pub fn get_save_path(&mut self, mut path: PathBuf) -> PathBuf{
 		let name = self.get_name().expect("No Name");
 		path.push(name);
-		Self::mkdir(&path).expect("Error making Directory");;
-		
+		return path;
+	}
+	
+	pub fn init(&mut self, api: &mut super::Api, mut path: PathBuf) -> ApiResult<()>{
+		//Test to see if loc is valid?
+		Self::mkdir(&path).expect("Error making Directory");
 		
 		let asset_dirs: [PathBuf; 2] = [
 			"images".into(),
@@ -120,6 +125,14 @@ impl Project {
 			println!("Saving: {}", path.display());
 			std::fs::write(&path, json).unwrap();
 			path.pop();
+			
+			if let Some(stats) = self.stats.as_ref(){
+				path.push("project_stats.json");
+				let json = serde_json::to_vec_pretty(&stats).expect("Error serializing");
+				println!("Saving: {}", path.display());
+				std::fs::write(&path, json).unwrap();
+				path.pop();
+			}
 			path.pop();
 		}
 

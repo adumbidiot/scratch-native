@@ -25,14 +25,27 @@ impl Api {
 		return Ok(body);
 	}
 	
-	pub fn get_project(&mut self, code: &str) -> ApiResult<Project>{
+	pub fn get_stats(&mut self, code: &str) -> ApiResult<InfoJson>{
+		let url = format!("https://api.scratch.mit.edu/projects/{}/", code);
+		let body = self.get_url(&url)?;
+		let stats = serde_json::from_slice(&body).expect("Error parsing");
+		return Ok(stats);
+	}
+	
+	pub fn get_project_json(&mut self, code: &str) -> ApiResult<ProjectJson>{
 		let url = format!("https://cdn.projects.scratch.mit.edu/internalapi/project/{}/get", code);
-		
-		
 		let body = self.get_url(&url)?;
 		let project_json: ProjectJson = serde_json::from_slice(&body).expect("Error Parsing");
+		return Ok(project_json);
+	}
+	
+	pub fn get_project(&mut self, code: &str) -> ApiResult<Project>{
+		let project_json = self.get_project_json(code)?;
 		let mut project: Project = project_json.into();
 		project.code = Some(code.to_string());
+		
+		let stats = self.get_stats(code)?;
+		project.stats = Some(stats);
 		
 		return Ok(project);
 	}

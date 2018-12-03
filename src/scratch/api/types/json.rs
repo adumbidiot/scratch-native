@@ -11,6 +11,7 @@ pub struct ProjectJson {
 	
 	pub children: Vec<SpriteJson>,
 	pub costumes: Vec<CostumeJson>,
+	pub sounds: Vec<SoundJson>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -42,8 +43,8 @@ pub struct SpriteJson{
 	#[serde(rename = "scratchY")]
 	pub y: i32,
 	
-	pub costumes: Vec<CostumeJson>
-	pub sounds: Vec<SoundJson>
+	pub costumes: Vec<CostumeJson>,
+	pub sounds: Option<Vec<SoundJson>>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -51,6 +52,43 @@ pub struct SoundJson{
 	#[serde(rename = "soundName")]
 	pub name: String,
 	
-	#[serde(rename = "83a9787d4cb6f3b7632b4ddfebf74367.wav")]
+	#[serde(rename = "md5")]
 	pub src: String,
+}
+
+#[derive(Serialize, Deserialize, Debug, Default)]
+pub struct InfoJson{
+	author: AuthorJson,
+	comments_allowed: bool,
+	description: String,
+	history: HistoryJson,
+	id: u64,
+	image: String,
+	instructions: String,
+	is_published: bool,
+	
+	title: String,
+	visibility: String,
+}
+
+#[derive(Serialize, Deserialize, Debug, Default)]
+pub struct AuthorJson{
+	id: u64,
+	username: String,
+}
+
+#[derive(Serialize, Deserialize, Debug, Default)]
+pub struct HistoryJson{
+	created: String,
+	modified: String,
+	shared: String,
+}
+
+#[derive(Serialize, Deserialize, Debug, Default)]
+pub struct StatsJson{
+	comments: u64,
+	favorites: u64,
+	loves: u64,
+	remixes: u64,
+	views: u64,
 }
