@@ -11,6 +11,8 @@ pub struct ProjectJson {
 	
 	pub children: Vec<SpriteJson>,
 	pub costumes: Vec<CostumeJson>,
+	
+	#[serde(default)]
 	pub sounds: Vec<SoundJson>,
 }
 
@@ -38,16 +40,18 @@ pub struct SpriteJson{
 	pub name: String,
 	
 	#[serde(rename = "scratchX")]
-	pub x: i32,
+	pub x: f64,
 	
 	#[serde(rename = "scratchY")]
-	pub y: i32,
+	pub y: f64,
 	
 	pub costumes: Vec<CostumeJson>,
-	pub sounds: Option<Vec<SoundJson>>,
+	
+	#[serde(default)]
+	pub sounds: Vec<SoundJson>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct SoundJson{
 	#[serde(rename = "soundName")]
 	pub name: String,
@@ -66,7 +70,7 @@ pub struct InfoJson{
 	image: String,
 	instructions: String,
 	is_published: bool,
-	
+	stats: StatsJson,
 	title: String,
 	visibility: String,
 }

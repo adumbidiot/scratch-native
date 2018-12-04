@@ -1,4 +1,4 @@
-use super::api::types::Sprite;
+use super::api::types::json::SpriteJson;
 
 const PISTON_TEMPLATE_FRAG_1: &'static str = r#"
 extern crate scratch_ui;
@@ -17,7 +17,7 @@ pub fn get_piston_app(input: &str) -> String{
 	return format!("{}{}{}", PISTON_TEMPLATE_FRAG_1, input, PISTON_TEMPLATE_FRAG_2);
 }
 
-pub fn get_sprite(s: &Sprite) -> String{
+pub fn get_sprite(s: &SpriteJson) -> String{
 	return format!(
 	r#"
 		app.add_sprite(Sprite::new()

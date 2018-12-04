@@ -5,6 +5,7 @@ use std::path::PathBuf;
 pub use self::json::*;
 pub use self::super::*;
 use self::super::targets::Target;
+use self::super::super::utils::DirCreater;
 
 #[derive(Debug, Serialize, Deserialize, Default)]
 pub struct Project {
@@ -45,11 +46,6 @@ impl Project {
 		return Some(self.name.get_or_insert("scratch_".to_string() + self.code.as_ref()?));
 	}
 	
-	fn mkdir(path: &PathBuf) -> Result<(), std::io::Error>{
-		println!("Making dir: {}", path.display());
-		return std::fs::create_dir(&path);
-	}
-	
 	pub fn get_save_path(&mut self, mut path: PathBuf) -> PathBuf{
 		let name = self.get_name().expect("No Name");
 		path.push(name);
@@ -57,85 +53,72 @@ impl Project {
 	}
 	
 	pub fn init(&mut self, api: &mut super::Api, mut path: PathBuf) -> ApiResult<()>{
+		let mut sound_list: Vec<&String> = Vec::new();
+		sound_list.extend(self.project_json.sounds.iter().map(|el| &el.src));
+		sound_list.extend(self.project_json.children.iter().flat_map(|child| child.sounds.iter().map(|el| &el.src)));
+		
+		let mut img_list: Vec<&String> = Vec::new();
+		img_list.extend(self.project_json.costumes.iter().map(|el| &el.src));
+		img_list.extend(self.project_json.children.iter().flat_map(|child| child.costumes.iter().map(|el| &el.src)));
+		
 		//Test to see if loc is valid?
-		Self::mkdir(&path).expect("Error making Directory");
+		let mut builder = DirCreater::new(path.clone());
+		builder
+			.mkdir().expect("Error making Dir")
+				.down("assets")
+				.mkdir().expect("Error making assets dir")
+					.down("images")
+					.mkdir().expect("Error making images dir")
+				.up()
+					.down("audio")
+					.mkdir().expect("Error making Audio Dir")
+				.up()
+			.up()
+				.down("target")
+				.mkdir().expect("Error Making Target Dir")
+			.up()
+				.down("metadata")
+				.mkdir().expect("Error making metadata dir")
+				.write_file("project.json", &serde_json::to_vec_pretty(&self.project_json).expect("Error serializing"))
+				.expect("Error Saving metadata project.json")
+			.up()
+			.write_file("project.json", &serde_json::to_vec_pretty(&self).expect("Error serializing"))
+			.expect("Error Saving project.json");
 		
-		let asset_dirs: [PathBuf; 2] = [
-			"images".into(),
-			"audio".into(),
-		];
-		
-		let project_dirs: [PathBuf; 2] = [
-			"target".into(),
-			"metadata".into(),
-		];
-		
-		{
-			path.push("assets");
-			Self::mkdir(&path).expect("Error making Directory");
-			
-			for rel_path in asset_dirs.iter(){
-				path.push(rel_path);
-				Self::mkdir(&path).expect("Error making Directory");;
-				path.pop();
-			}
-			path.pop();
+		builder
+			.down("assets")
+			.down("audio");
+		let mut asset_buf = Vec::new();
+		for filename in sound_list {
+			println!("Downloading: {}", filename);
+			asset_buf = api.get_asset(filename).unwrap();
+			builder
+				.write_file(filename, &asset_buf)
+				.expect("Error Saving file");
 		}
 		
-		{
-			for rel_path in &project_dirs {
-				path.push(&rel_path);
-				Self::mkdir(&path).unwrap();
-				path.pop();
-			}
+		builder
+			.up()
+			.down("images");
+		
+		for filename in img_list {
+			println!("Downloading: {}", filename);
+			asset_buf = api.get_asset(filename).unwrap();
+			builder
+				.write_file(filename, &asset_buf)
+				.expect("Error Saving file");
 		}
 		
-		path.push("assets/images");
-		for child in self.project_json.children.iter() {
-			for costume in child.costumes.iter() {
-				let filename = &costume.src;
-				println!("Downloading: {}", filename);
-				let asset_buf = api.get_asset(filename).unwrap();
-				path.push(filename);
-				std::fs::write(&path, asset_buf).expect("Error writing asset file");
-				path.pop();
-			}
-		}
-		path.pop();
-		path.pop();
+		builder
+			.up()
+			.up();
 		
-		{
-			path.push("assets/audio");
-			path.pop();
-			path.pop();
+		if let Some(stats) = self.stats.as_ref(){
+			builder.down("metadata");
+			builder.write_file("project_stats.json", &serde_json::to_vec_pretty(&stats).expect("Error serializing"))
+				.expect("Could not save stats file");
 		}
 		
-		{
-			path.push("project.json");
-			let json = serde_json::to_vec_pretty(&self).expect("Error serializing");
-			println!("Saving: {}", path.display());
-			std::fs::write(&path, json).unwrap();
-			path.pop();
-		}
-		
-		{
-			path.push("metadata");
-			path.push("project.json");
-			let json = serde_json::to_vec_pretty(&self.project_json).expect("Error serializing");
-			println!("Saving: {}", path.display());
-			std::fs::write(&path, json).unwrap();
-			path.pop();
-			
-			if let Some(stats) = self.stats.as_ref(){
-				path.push("project_stats.json");
-				let json = serde_json::to_vec_pretty(&stats).expect("Error serializing");
-				println!("Saving: {}", path.display());
-				std::fs::write(&path, json).unwrap();
-				path.pop();
-			}
-			path.pop();
-		}
-
 		return Ok(());
 	}
 	
@@ -172,54 +155,5 @@ impl From<ProjectJson> for Project {
         let mut p = Project::default();
 		p.project_json = data;
 		return p;
-    }
-}
-
-impl From<SpriteJson> for Sprite {
-    fn from(data: SpriteJson) -> Sprite {
-        let mut s = Sprite {
-			name: data.name,
-			x: data.x,
-			y: data.y,
-			costumes: Vec::new(),
-		};
-		
-		let costumes: Vec<Costume> = data.costumes
-			.into_iter()
-			.map(|child| Costume::from(child))
-			.collect();
-			
-		s.costumes = costumes;
-		
-		return s;
-    }
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-pub struct Sprite{
-	pub name: String,
-	pub x: i32,
-	pub y: i32,
-	pub costumes: Vec<Costume>
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-pub struct Costume{
-	pub name: String,
-	pub src: String,
-	pub resolution: u8,
-	pub center_x: i32,
-	pub center_y: i32,
-}
-
-impl From<CostumeJson> for Costume {
-    fn from(data: CostumeJson) -> Costume {
-        Costume {
-			name: data.name,
-			src: data.src,
-			resolution: data.resolution,
-			center_x: data.center_x,
-			center_y: data.center_y,
-		}
     }
 }

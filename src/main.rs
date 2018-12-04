@@ -36,6 +36,10 @@ fn main() {
                 .takes_value(true)
 				.short("t")
 				.long("type")))
+		.subcommand(SubCommand::with_name("build")
+            .arg(Arg::with_name("path")
+                .required(true))) //Remove for current dir?
+		.subcommand(SubCommand::with_name("old_main"))
 		.get_matches();
 	
 	let mut api = scratch::api::Api::new();
@@ -62,7 +66,8 @@ fn main() {
 					return;
 				}else if output_char == 'Y' {
 					println!("Deleting Directory...");
-					std::fs::remove_dir_all(&save_path).unwrap();
+					std::fs::remove_dir_all(&save_path).expect("Could not delete dir");
+					//std::fs::remove_dir(&save_path).unwrap();
 				}else{
 					println!("Unknown Input. Aborting...");
 					return;
@@ -97,7 +102,10 @@ fn main() {
 			}
 		},
 		("build", Some(matches)) => {
-			
+			let path = PathBuf::from(matches.value_of("path").expect("No path specified"));
+		},
+		("old_main", Some(matches)) => {
+			old_main();
 		},
         ("", None) => println!("No subcommand was used"),
         _ => unreachable!(), 
@@ -106,10 +114,10 @@ fn main() {
 
 //Hack to keep old code
 fn old_main(){
-	std::fs::remove_dir_all("projects/239742347/target/js");
+	std::fs::remove_dir_all("projects/scratch_239742347/target/js");
 	println!("Loading Project... ");
 	let mut path = PathBuf::from("projects");
-	path.push("239742347");
+	path.push("scratch_239742347");
 	let mut project = scratch::api::types::Project::from_path(path).expect("Error Loading Project");
 	let mut target = scratch::api::targets::JsTarget::new();
 	println!("Setting up target... ");

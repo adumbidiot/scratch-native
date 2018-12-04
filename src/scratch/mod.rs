@@ -1,6 +1,7 @@
 mod error;
 mod templates;
 pub mod api;
+pub mod utils;
 
 use hyper::rt::{Future, Stream};
 
