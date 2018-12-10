@@ -2,7 +2,7 @@ mod error;
 mod templates;
 pub mod api;
 pub mod utils;
-
+/*
 use hyper::rt::{Future, Stream};
 
 use self::error::Error;
@@ -17,7 +17,7 @@ use std::io::{Write, Read};
 use std::process::Command;
 use std::sync::{RwLock, Arc};
 use std::path::PathBuf;
-/*
+
 pub fn build_project(project_path: &PathBuf) -> Result<impl Future<Item=(), Error=Error>, Error>{
 	let mut project_path_mut = project_path.clone();
 	//let project_name = project_path.file_stem().ok_or(())?.into_owned();
@@ -161,6 +161,7 @@ pub fn build_project(project_path: &PathBuf) -> Result<impl Future<Item=(), Erro
 	return Ok(work);
 }
 */
+/*
 pub fn init_rust_project(path: PathBuf, project: &mut api::types::Project) -> impl Future<Item=(), Error=Error>{
 	let project_name = project.get_name().unwrap();
 	return Command::new("cargo")
@@ -200,3 +201,4 @@ pub fn copy_dir(src: PathBuf, mut dest: PathBuf) -> impl Future<Item=(), Error=E
 	
 	return work.from_err();
 }
+*/

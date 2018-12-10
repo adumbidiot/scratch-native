@@ -1,9 +1,12 @@
 pub mod json;
+pub mod block;
 
 use std::path::PathBuf;
 
 pub use self::json::*;
+pub use self::block::*;
 pub use self::super::*;
+
 use self::super::targets::Target;
 use self::super::super::utils::DirCreater;
 
@@ -14,6 +17,9 @@ pub struct Project {
 	
 	#[serde(default)]
 	pub name: Option<String>,
+	
+	#[serde(default)]
+	pub sounds: Vec<SoundJson>,
 	
 	#[serde(skip)]
 	pub path: Option<PathBuf>,
