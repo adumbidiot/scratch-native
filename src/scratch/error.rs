@@ -1,11 +1,11 @@
 #[derive(Debug)]
-pub enum Error{
-	Stringify(std::string::FromUtf8Error),
-	Json(serde_json::Error),
-	File(std::io::Error),
-	TomlDecode(toml::de::Error),
-	TomlEncode(toml::ser::Error),
-	Option(()),
+pub enum Error {
+    Stringify(std::string::FromUtf8Error),
+    Json(serde_json::Error),
+    File(std::io::Error),
+    TomlDecode(toml::de::Error),
+    TomlEncode(toml::ser::Error),
+    Option(()),
 }
 
 impl From<std::string::FromUtf8Error> for Error {
