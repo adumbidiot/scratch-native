@@ -199,25 +199,30 @@ impl Target for PyGameTarget {
                                 ));
                                 codegen.tab_index -= 1;
                             }
-							"motion_goto" => {
-								codegen.writeln(&format!("def block_{}(e):\n", i));
-								codegen.tab_index += 1;
-								let loc = target.blocks[block.inputs["TO"][1].as_str().unwrap()].fields["TO"][0].as_str().unwrap();
-								match loc {
-									"_mouse_" => {
-										codegen.writeln("pos = pygame.mouse.get_pos()");
-										codegen.writeln(&format!("{}.x = -(480 / 2) + pos[0]", name));
-										codegen.writeln(&format!("{}.y = (360 / 2) - pos[1]", name));
-									},
-									_=> unimplemented!()
-								}	
-							},
-							"motion_turnright" => {
-								codegen.writeln(&format!("def block_{}(e):\n", i));
-								codegen.tab_index += 1;
-								let turn = block.inputs["DEGREES"][1][1].as_str().unwrap();
-								codegen.writeln(&format!("{}.direction += {}", name, turn));
-							}
+                            "motion_goto" => {
+                                codegen.writeln(&format!("def block_{}(e):\n", i));
+                                codegen.tab_index += 1;
+                                let loc = target.blocks[block.inputs["TO"][1].as_str().unwrap()]
+                                    .fields["TO"][0]
+                                    .as_str()
+                                    .unwrap();
+                                match loc {
+                                    "_mouse_" => {
+                                        codegen.writeln("pos = pygame.mouse.get_pos()");
+                                        codegen
+                                            .writeln(&format!("{}.x = -(480 / 2) + pos[0]", name));
+                                        codegen
+                                            .writeln(&format!("{}.y = (360 / 2) - pos[1]", name));
+                                    }
+                                    _ => unimplemented!(),
+                                }
+                            }
+                            "motion_turnright" => {
+                                codegen.writeln(&format!("def block_{}(e):\n", i));
+                                codegen.tab_index += 1;
+                                let turn = block.inputs["DEGREES"][1][1].as_str().unwrap();
+                                codegen.writeln(&format!("{}.direction += {}", name, turn));
+                            }
                             _ => {
                                 index += &format!("def block_{}(e):\n", i);
                                 index += &format!("\tprint('NOT IMPLEMENTED: {}')\n", block.opcode);

@@ -11,34 +11,27 @@ use crate::{
     ScratchError,
     ScratchResult,
 };
-use curl::easy::{
-    Easy2,
-    Handler,
-    WriteError,
-};
 
 pub struct Client {
-    handle: Easy2<BufferBody>,
+    handle: reqwest::Client,
 }
 
 impl Client {
     pub fn new() -> Self {
         Client {
-            handle: Easy2::new(BufferBody::new()),
+            handle: reqwest::Client::new(),
         }
     }
 
     pub fn get_url(&mut self, url: &str) -> ScratchResult<Vec<u8>> {
-        self.handle.url(&url).unwrap();
-        self.handle.perform().map_err(|_| {
-            self.handle.get_mut().reset();
-            ScratchError::Network
-        })?;
-
-        let handler = self.handle.get_mut();
-        let body = handler.take_buffer();
-        handler.reset();
-        Ok(body)
+        let mut buf = Vec::new();
+        self.handle
+            .get(url)
+            .send()
+            .map_err(|_e| ScratchError::Network)?
+            .copy_to(&mut buf)
+            .map_err(|_e| ScratchError::Network)?;
+        Ok(buf)
     }
 
     pub fn get_stats(&mut self, project: &NetworkProject) -> ScratchResult<ProjectInfoJson> {
@@ -62,32 +55,5 @@ impl Client {
             file
         );
         self.get_url(&url)
-    }
-}
-
-struct BufferBody {
-    buffer: Vec<u8>,
-}
-
-impl BufferBody {
-    pub fn new() -> Self {
-        Self { buffer: Vec::new() }
-    }
-
-    pub fn take_buffer(&mut self) -> Vec<u8> {
-        let mut buffer = Vec::new();
-        std::mem::swap(&mut self.buffer, &mut buffer);
-        buffer
-    }
-
-    pub fn reset(&mut self) {
-        self.buffer.truncate(0);
-    }
-}
-
-impl Handler for BufferBody {
-    fn write(&mut self, data: &[u8]) -> Result<usize, WriteError> {
-        self.buffer.extend_from_slice(data);
-        Ok(data.len())
     }
 }
